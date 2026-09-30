@@ -1,0 +1,9 @@
+node_modules/
+dist/
+dist-test/
+main.js
+npmcache/
+_npmcache/
+*.log
+data.json
+.DS_Store

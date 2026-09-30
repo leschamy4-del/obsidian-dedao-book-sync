@@ -1,0 +1,26 @@
+{
+  "name": "obsidian-dedao-book-sync",
+  "version": "0.1.0",
+  "description": "Sync Dedao (得到) ebook highlights and your margin notes from Dedao Brain into per-book folders in your Obsidian vault.",
+  "main": "main.js",
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node esbuild.config.mjs --test && node --test dist-test/"
+  },
+  "keywords": [
+    "obsidian",
+    "dedao",
+    "ebook",
+    "highlights",
+    "reading-notes"
+  ],
+  "author": "Marvincao",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "esbuild": "^0.24.0",
+    "obsidian": "^1.7.2",
+    "typescript": "^5.7.2"
+  }
+}

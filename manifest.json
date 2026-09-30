@@ -1,0 +1,10 @@
+{
+  "id": "dedao-book-sync",
+  "name": "Dedao Book Sync",
+  "version": "0.1.0",
+  "minAppVersion": "1.5.0",
+  "description": "Sync Dedao (得到) ebook highlights and your margin notes into per-book Markdown folders via the official Dedao Brain OpenAPI.",
+  "author": "Marvincao",
+  "authorUrl": "https://github.com/leschamy4-del",
+  "isDesktopOnly": true
+}
