@@ -1,6 +1,6 @@
 {
   "name": "obsidian-dedao-book-sync",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Sync Dedao (得到) ebook highlights and your margin notes from Dedao Brain into per-book folders in your Obsidian vault.",
   "main": "main.js",
   "scripts": {

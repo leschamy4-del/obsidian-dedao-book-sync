@@ -8,8 +8,9 @@ class FolderSuggest extends AbstractInputSuggest<TFolder> {
   }
   override getSuggestions(query: string): TFolder[] {
     const q = (query ?? '').toLowerCase();
-    return this.app.vault
-      .getAllFolders()
+    return (this.app.vault
+      .getAllLoadedFiles()
+      .filter(f => f instanceof TFolder) as TFolder[])
       .filter(f => !q || f.path.toLowerCase().includes(q));
   }
   override renderSuggestion(folder: TFolder, el: HTMLElement): void {
@@ -38,7 +39,7 @@ export class DedaoBookSyncSettingTab extends PluginSettingTab {
     const s = this.plugin.data.settings;
     const state = this.plugin.data.state;
 
-    containerEl.createEl('h2', { text: '得到书籍同步（Dedao Book Sync）' });
+    new Setting(containerEl).setName('得到书籍同步（Dedao Book Sync）').setHeading();
 
     // ---------- 凭据 ----------
     new Setting(containerEl).setName('凭据').setHeading();
@@ -47,7 +48,7 @@ export class DedaoBookSyncSettingTab extends PluginSettingTab {
       .setDesc('得到大脑 OpenAPI 的 Bearer Token（与 dedao-kb-sync 里同一个）')
       .addText(t => {
         t.inputEl.type = 'password';
-        t.inputEl.style.width = '100%';
+        t.inputEl.addClass('dbs-full-width');
         t.setValue(s.apiToken).onChange(async v => {
           s.apiToken = v.trim();
           await this.plugin.saveData(this.plugin.data);
@@ -57,7 +58,7 @@ export class DedaoBookSyncSettingTab extends PluginSettingTab {
       .setName('clientId')
       .setDesc('OpenAPI 的 X-Client-ID')
       .addText(t => {
-        t.inputEl.style.width = '100%';
+        t.inputEl.addClass('dbs-full-width');
         t.setValue(s.clientId).onChange(async v => {
           s.clientId = v.trim();
           await this.plugin.saveData(this.plugin.data);
@@ -70,7 +71,7 @@ export class DedaoBookSyncSettingTab extends PluginSettingTab {
       .setName('书籍根目录')
       .setDesc('每本书一个子文件夹：书籍/<书名>/，每条划线一个 md')
       .addText(t => {
-        t.inputEl.style.width = '100%';
+        t.inputEl.addClass('dbs-full-width');
         t.setValue(s.rootFolder).onChange(v => {
           s.rootFolder = v.trim();
         });
@@ -113,7 +114,7 @@ export class DedaoBookSyncSettingTab extends PluginSettingTab {
       .setName('全量回捞每轮页数')
       .setDesc('每页 20 条笔记；走完自动停，分多轮跑完整个历史')
       .addSlider(sl => {
-        sl.setLimits(5, 200, 5).setValue(s.backfillPagesPerRun).setDynamicTooltip()
+        sl.setLimits(5, 200, 5).setValue(s.backfillPagesPerRun)
           .onChange(async v => {
             s.backfillPagesPerRun = v;
             await this.plugin.saveData(this.plugin.data);

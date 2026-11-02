@@ -88,8 +88,9 @@ export default class DedaoBookSyncPlugin extends Plugin {
         const prefix = normalizePath(root) + '/';
         for (const file of vault.getMarkdownFiles()) {
           if (!file.path.startsWith(prefix)) continue;
-          const uid = this.app.metadataCache.getFileCache(file)?.frontmatter?.['uid'];
-          if (typeof uid === 'string' && uid) index.set(uid, file.path);
+          const fm = this.app.metadataCache.getFileCache(file)?.frontmatter;
+          const uidRaw: unknown = fm?.['uid'];
+          if (typeof uidRaw === 'string' && uidRaw) index.set(uidRaw, file.path);
         }
         return index;
       },

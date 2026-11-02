@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - "v*"
+      - "**"
 
 permissions:
   contents: write
@@ -45,10 +45,6 @@ jobs:
             manifest.json
             styles.css
 
-      - name: Checksums
-        run: |
-          sha256sum main.js manifest.json styles.css > sha256sums.txt
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -56,4 +52,3 @@ jobs:
             main.js
             manifest.json
             styles.css
-            sha256sums.txt

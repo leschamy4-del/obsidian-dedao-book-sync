@@ -251,7 +251,6 @@ test('engine: 全量回捞分页推进 + 增量截止', async () => {
 
   // 第 3 轮：回捞走到底
   const s3 = await runFetchCycle(data, client as never, { backfillPagesPerRun: 1, delayMs: 0 });
-  console.error('DBG s3:', JSON.stringify(s3), '| state:', JSON.stringify(data.state), '| refs:', data.refs.length);
   assert.equal(s3.backfillDone, true);
   assert.equal(data.refs.length, 6); // 300,299,298,100,99,1
 });

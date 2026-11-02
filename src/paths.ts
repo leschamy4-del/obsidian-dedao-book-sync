@@ -2,7 +2,7 @@
 
 /** 替换 Obsidian/Windows 文件名非法字符 */
 export function sanitizeSegment(name: string): string {
-  return (name ?? '').replace(/[\\/:*?"<>|#^\[\]]/g, '_').trim();
+  return (name ?? '').replace(/[\\/:*?"<>|#^[\]]/g, '_').trim();
 }
 
 /** 书籍落位目录：<root>/<书名> */

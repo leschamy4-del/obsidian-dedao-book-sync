@@ -6,9 +6,9 @@
  *  - 限流：qps_global_exceeded（HTTP 429，retryable），需节流 + 指数退避。
  */
 import type { RawNoteItem, RefNote } from './types';
+import { requestUrl } from 'obsidian';
 
 const BASE = 'https://openapi.biji.com/open/api/v1';
-const PAGE_SIZE = 20;
 
 export interface ListNotesResult {
   notes: RawNoteItem[];
@@ -45,7 +45,16 @@ export class DedaoApiError extends Error {
   }
 }
 
-const sleep = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
+const sleep = (ms: number) => new Promise<void>(r => window.setTimeout(r, ms));
+
+/** 传输层响应（便于测试注入与替换底层实现） */
+export interface TransportResponse {
+  status: number;
+  text: string;
+  headers: Record<string, string>;
+}
+
+export type Transport = (url: string) => Promise<TransportResponse>;
 
 export class DedaoClient {
   private lastRequestAt = 0;
@@ -53,24 +62,30 @@ export class DedaoClient {
   constructor(
     private readonly token: string,
     private readonly clientId: string,
-    private readonly opts: { delayMs?: number; fetchImpl?: typeof fetch; maxRetries?: number } = {},
+    private readonly opts: { delayMs?: number; transport?: Transport; maxRetries?: number } = {},
   ) {
     if (!token) throw new DedaoApiError('缺少 apiToken，请先在设置里填写', 0, false);
   }
 
-  private async throttledFetch(url: string): Promise<Response> {
-    const f = this.opts.fetchImpl ?? fetch;
+  /** 默认走 Obsidian 内置 requestUrl（无 CORS 限制、自动处理压缩） */
+  private async throttledFetch(url: string): Promise<TransportResponse> {
+    const transport = this.opts.transport ?? (async u => {
+      const res = await requestUrl({
+        url: u,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+          'X-Client-ID': this.clientId,
+        },
+        throw: false,
+      });
+      return { status: res.status, text: res.text, headers: res.headers };
+    });
     const delay = this.opts.delayMs ?? 1200;
     const wait = this.lastRequestAt + delay - Date.now();
     if (wait > 0) await sleep(wait);
     this.lastRequestAt = Date.now();
-    return f(url, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-        'X-Client-ID': this.clientId,
-      },
-    });
+    return transport(url);
   }
 
   /** GET + 429/网络错误指数退避（3s 起，最多 maxRetries 次） */
@@ -78,7 +93,7 @@ export class DedaoClient {
     const maxRetries = this.opts.maxRetries ?? 5;
     let attempt = 0;
     for (;;) {
-      let res: Response;
+      let res: TransportResponse;
       try {
         res = await this.throttledFetch(`${BASE}${path}`);
       } catch (err) {
@@ -92,12 +107,13 @@ export class DedaoClient {
           throw new DedaoApiError('请求频率超限（429），稍后再试', 429, true);
         }
         attempt += 1;
-        const retryAfter = Number(res.headers.get('Retry-After'));
+        const retryAfterRaw = Object.entries(res.headers ?? {}).find(([k]) => k.toLowerCase() === 'retry-after')?.[1];
+        const retryAfter = Number(retryAfterRaw);
         const wait = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 3000 * 2 ** (attempt - 1);
         await sleep(wait);
         continue;
       }
-      const text = await res.text();
+      const text = res.text;
       let json: Record<string, unknown>;
       try {
         json = JSON.parse(text) as Record<string, unknown>;
