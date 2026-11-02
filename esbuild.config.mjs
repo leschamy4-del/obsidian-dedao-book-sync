@@ -47,6 +47,7 @@ if (testMode) {
     target: 'es2021',
     platform: 'neutral',
     external: ['node:*'],
+    alias: { obsidian: './test/obsidian-stub.ts' },
     outfile: 'dist-test/unit.test.cjs',
     logLevel: 'info',
   });
