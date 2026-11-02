@@ -1,7 +1,9 @@
 import esbuild from 'esbuild';
 import { mkdirSync } from 'node:fs';
 
-const prod = process.argv.includes('--prod');
+/** 默认按发布配置构建（minify、无 sourcemap），与 CI/Release 产物一致；本地开发加 --dev */
+const dev = process.argv.includes('--dev');
+const prod = process.argv.includes('--prod') || !dev;
 const testMode = process.argv.includes('--test');
 
 mkdirSync('dist-test', { recursive: true });

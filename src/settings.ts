@@ -8,9 +8,9 @@ class FolderSuggest extends AbstractInputSuggest<TFolder> {
   }
   override getSuggestions(query: string): TFolder[] {
     const q = (query ?? '').toLowerCase();
-    return (this.app.vault
+    return this.app.vault
       .getAllLoadedFiles()
-      .filter(f => f instanceof TFolder) as TFolder[])
+      .filter(f => f instanceof TFolder)
       .filter(f => !q || f.path.toLowerCase().includes(q));
   }
   override renderSuggestion(folder: TFolder, el: HTMLElement): void {
@@ -38,8 +38,6 @@ export class DedaoBookSyncSettingTab extends PluginSettingTab {
     containerEl.empty();
     const s = this.plugin.data.settings;
     const state = this.plugin.data.state;
-
-    new Setting(containerEl).setName('得到书籍同步（Dedao Book Sync）').setHeading();
 
     // ---------- 凭据 ----------
     new Setting(containerEl).setName('凭据').setHeading();
